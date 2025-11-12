@@ -1,8 +1,13 @@
-def cleanTile(pos: list[int], env: list[list[int]]) -> None:
-    env[pos[0]][pos[1]] = 0
+def move(destination: tuple[int, int]):
+    pass
 
 
-def readSensor(pos: list[int], env: list[list[int]]) -> list[int]:
+def clean_tile(pos: list[int], matrix: list[list[int]]) -> None:
+    matrix[pos[0]][pos[1]] = 0
+    print(f"cleaned ({pos[0]}, {(pos[1])})")
+
+
+def read_sensor(pos: list[int], env: list[list[int]]) -> dict[str, int]:
     y, x = pos
     print("position: (y, x)", y, x)
     # The matrix is bi-dimensional and squared
@@ -13,10 +18,10 @@ def readSensor(pos: list[int], env: list[list[int]]) -> list[int]:
         if found:
             break
         radius = i + 1
-        print("radius: ", radius)
+        # print("radius: ", radius)
 
         cols, rows = get_axes((y, x), radius, matrix_size)
-        print(cols, rows)
+        # print(cols, rows)
 
         # TODO: Eliminate redundancy: there's an overlap between the searchs of rows and cols
         for colx in cols:
@@ -35,9 +40,7 @@ def readSensor(pos: list[int], env: list[list[int]]) -> list[int]:
                 y = row
                 break
 
-            print("")
-
-    return [y, x, radius]
+    return {"y": y, "x": x, "radius": radius}
 
 
 def determine_bounds(axis_val: int, radius: int, matrix_size: int) -> tuple[int, int]:
@@ -88,7 +91,7 @@ def search_matrix(
         elif axis_name == "row":
             col, row = i, axis
 
-        print("coords: ", row, col, ": ", matrix[row][col])
+        # print("coords: ", row, col, ": ", matrix[row][col])
 
         # x = col
         # y = row
@@ -98,22 +101,30 @@ def search_matrix(
 
 
 # (0, 1), (1, 0), (1, 1)
-# environment: list[list[int]] = [
-#     [0, 0, 0, 0, 0],
-#     [0, 0, 0, 0, 0],
-#     [0, 0, 0, 0, 0],
-#     [0, 0, 0, 0, 0],
-#     [0, 0, 0, 0, 1],
-# ]
-
 environment: list[list[int]] = [
-    [0, 0, 0],
-    [0, 0, 1],
-    [9, 1, 0],
+    [0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 1],
+    [1, 0, 0, 0, 0],
+    [0, 0, 0, 1, 0],
+    [0, 1, 0, 0, 0],
 ]
 
-pos: list[int] = [2, 0]
+# environment: list[list[int]] = [
+#     [0, 0, 0],
+#     [0, 0, 1],
+#     [9, 1, 0],
+# ]
 
-a = readSensor(pos, environment)
-print("sujo: ", a)
+pos: list[int] = [0, 1]
 
+while True:
+    search_res: dict[str, int] = read_sensor(pos, environment)
+    dirty: list[int] = [search_res["y"], search_res["x"]]
+
+    # All clean
+    if pos == dirty:
+        break
+
+    pos = dirty
+    clean_tile(pos, environment)
+    print()
