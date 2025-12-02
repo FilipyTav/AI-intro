@@ -270,14 +270,6 @@ def genetic_algo(
     return [Coord2D(-1, -1)]
 
 
-# environment: list[list[int]] = [
-#     [0, 2, 0, 2, 0],
-#     [0, 2, 0, 2, 0],
-#     [0, 0, 0, 2, 0],
-#     [0, 2, 0, 2, 0],
-#     [0, 2, 0, 0, 0],
-# ]
-
 environment: list[list[int]] = [
     [0, 0, 0],
     [0, 0, 0],
