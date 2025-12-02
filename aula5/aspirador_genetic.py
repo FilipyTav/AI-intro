@@ -218,7 +218,8 @@ def is_valid_indiv(indiv: Indiv, start_pos: Coord2D, correct_size: int) -> bool:
 def genetic_algo(
     matrix: Matrix2D, start: Coord2D, end: Coord2D, gens: int = 150, pop_size: int = 100
 ) -> Indiv:
-    pop: list[Indiv] = gen_indivs(pop_size, len(matrix), start)
+    min_len = max(abs(start.x - end.x), abs(start.y - end.y)) + 1
+    pop: list[Indiv] = gen_indivs(pop_size, min_len, start)
 
     for i in range(gens):
         scores: list[tuple[Indiv, float]] = []
@@ -232,9 +233,11 @@ def genetic_algo(
         best_indiv: Indiv = best[0]
         best_h: float = best[1]
 
-        # print(f"Best: {best_indiv} --- Valid: {is_valid_indiv(best_indiv, start)}")
+        # print(
+        #     f"Best: {best_indiv} --- Valid: {is_valid_indiv(best_indiv, start, min_len)}"
+        # )
 
-        if best_h == 0 and is_valid_indiv(best_indiv, start, len(matrix)):
+        if best_h == 0 and is_valid_indiv(best_indiv, start, min_len):
             print("Found solution!")
             return best_indiv
 
@@ -242,7 +245,10 @@ def genetic_algo(
         apts: list[Indiv] = pop[:AMOUNT_APTS]
         acceptables: list[Indiv] = pop[:AMOUNT_ACCEPTABLE]
 
-        while len(apts) < pop_size:
+        attempts = 0
+        max_attempts = 1000  # arbitrary safe number
+        while len(apts) < pop_size and attempts < max_attempts:
+            attempts += 1
             dad: Indiv = random.choice(acceptables)
             mom: Indiv = random.choice(acceptables)
 
@@ -252,14 +258,15 @@ def genetic_algo(
                     break
 
                 if random.random() < PROB_MUTATION / 100:
-                    children[i] = mutate(children[i], len(matrix))
+                    children[i] = mutate(children[i], min_len)
 
-                if is_valid_indiv(children[i], start, len(matrix)):
+                if is_valid_indiv(children[i], start, min_len):
                     apts.append(children[i])
 
         pop = apts
 
     # No valid Individual found
+    print("Could not find a valid path")
     return [Coord2D(-1, -1)]
 
 
@@ -278,12 +285,12 @@ environment: list[list[int]] = [
 ]
 
 pos = [0, 0]
-a = genetic_algo(environment, Coord2D(1, 1), Coord2D(2, 2))
-print("Best route: ", a)
+# a = genetic_algo(environment, Coord2D(0, 0), Coord2D(2, 2))
+# print("Best route: ", a)
 
 # print(path)
 
-while False:
+while True:
     search_res: dict[str, int] = read_sensor(pos, environment)
     dirty: list[int] = [search_res["y"], search_res["x"]]
 
@@ -292,14 +299,10 @@ while False:
         break
     print("Trash in", dirty)
 
-    # Avoids obstacles - stochastic
-    path: list[Coord2D] = hill_climbing(
-        Coord2D(pos[1], pos[0]),
-        Coord2D(search_res["x"], search_res["y"]),
-        environment,
-        # for more info on the path
-        # True,
+    path: list[Coord2D] = genetic_algo(
+        environment, Coord2D(pos[1], pos[0]), Coord2D(search_res["x"], search_res["y"])
     )
+
     print("Path: ", path)
 
     pos = dirty
