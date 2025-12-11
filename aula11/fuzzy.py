@@ -1,6 +1,3 @@
-# Mini sistema fuzzy para controlar ventilador baseado na temperatura
-
-
 # Funções de pertinência (triangulares)
 def triangular(x, a, b, c):
     if x <= a or x >= c:
@@ -12,7 +9,7 @@ def triangular(x, a, b, c):
     return 0
 
 
-# Conjuntos fuzzy da temperatura
+# Conjuntos fuzzy dos dias
 def none(day):
     return triangular(day, 0, 2.5, 4.5)
 
